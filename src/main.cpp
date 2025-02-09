@@ -2,6 +2,7 @@
 #include <SFML/Window.hpp>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <string>
 #include <ctime>
@@ -51,6 +52,41 @@ void saveToCSV(const std::string &name)
     }
     file.close();
     std::cout << "grid saved " << name << "\n";
+}
+
+void loadCSV()
+{
+    std::string name;
+    std::cout << "enter name of file to load in ('45632') DO NOT INCLUDE .csv!!!!!!!!\n";
+    std::cin >> name;
+    if (name == "" || name == " " || name == "\n")
+    {
+        return;
+    }
+    name += ".csv";
+    std::ifstream file(name);
+    if (!file.is_open())
+    {
+        std::cerr << "error loading the csv in\n";
+        return;
+    }
+
+    std::string line;
+    int row = 0;
+    while (std::getline(file, line) && row < GRIDSIZE)
+    {
+        std::stringstream ss(line);
+        std::string cell;
+        int col = 0;
+        while (std::getline(ss, cell, ',') && col < GRIDSIZE)
+        {
+            grid[row * GRIDSIZE + col] = std::stoi(cell) == 0 ? 1 : std::stoi(cell);
+            col++;
+        }
+        row++;
+    }
+    file.close();
+    std::cout << "island loaded from " << name << "\n";
 }
 
 void handleDrawing(const sf::RenderWindow &window)
@@ -127,6 +163,10 @@ int main()
                     std::string name = std::to_string(now);
                     name += ".csv";
                     saveToCSV(name);
+                }
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Enter))
+                {
+                    loadCSV();
                 }
                 // this is evil and I hate this but idk/can't be bothered doing the proper thing
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num0))
