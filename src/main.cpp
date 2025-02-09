@@ -9,8 +9,8 @@
 
 const float TILESIZE = 32;
 const float GRIDSIZE = 16;
-const int WIDTH = 800;
-const int HEIGHT = 512;
+const int WIDTH = 1000;
+const int HEIGHT = 640;
 
 std::vector<int> grid(GRIDSIZE *GRIDSIZE, 0);
 int selectedTile = 0;
