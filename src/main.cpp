@@ -111,6 +111,11 @@ int main()
     sf::Vector2u sheetSize = sheet.getSize();
     int sheetCols = sheetSize.x / TILESIZE;
 
+    sf::Font font("./gfx/font.ttf");
+    sf::Text credit(font, "Made for CMP105 team abra\n Jack Sneddon - 2309340", 22);
+    credit.setFillColor(sf::Color::White);
+    credit.setPosition({WIDTH * 0.67f, HEIGHT * 0.88f});
+
     while (window.isOpen())
     {
         while (const std::optional<sf::Event> event = window.pollEvent())
@@ -252,6 +257,7 @@ int main()
 
         // Draw tilesheet
         window.draw(palette);
+        window.draw(credit);
         window.display();
     }
     return 0;
