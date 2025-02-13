@@ -6,11 +6,12 @@
 #include <vector>
 #include <string>
 #include <ctime>
+#include <queue>
 
 const float TILESIZE = 32;
-const float GRIDSIZE = 16;
-const int WIDTH = 1000;
-const int HEIGHT = 640;
+const float GRIDSIZE = 32;
+const int WIDTH = 1920;
+const int HEIGHT = 1080;
 
 std::vector<int> grid(GRIDSIZE *GRIDSIZE, 0);
 int selectedTile = 0;
@@ -89,14 +90,52 @@ void loadCSV()
     std::cout << "island loaded from " << name << "\n";
 }
 
-void handleDrawing(const sf::RenderWindow &window)
+void bucketFill(int x, int y, int newTile)
+{
+    int oldTile = grid[y * GRIDSIZE + x];
+    if (oldTile == newTile)
+        return;
+
+    std::queue<sf::Vector2i> toFill;
+    toFill.push({x, y});
+
+    while (!toFill.empty())
+    {
+        sf::Vector2i pos = toFill.front();
+        toFill.pop();
+
+        int px = pos.x;
+        int py = pos.y;
+        if (px < 0 || px >= GRIDSIZE || py < 0 || py >= GRIDSIZE)
+            continue;
+        if (grid[py * GRIDSIZE + px] != oldTile)
+            continue;
+
+        grid[py * GRIDSIZE + px] = newTile;
+
+        toFill.push({px + 1, py});
+        toFill.push({px - 1, py});
+        toFill.push({px, py + 1});
+        toFill.push({px, py - 1});
+    }
+}
+
+void handleDrawing(const sf::RenderWindow &window, bool bucket)
 {
     sf::Vector2i mPos = sf::Mouse::getPosition(window);
     if (mPos.x < GRIDSIZE * TILESIZE && mPos.y < GRIDSIZE * TILESIZE)
     {
         int gridX = mPos.x / TILESIZE;
         int gridY = mPos.y / TILESIZE;
-        grid[gridY * GRIDSIZE + gridX] = selectedTile;
+
+        if (bucket)
+        {
+            bucketFill(gridX, gridY, selectedTile);
+        }
+        else
+        {
+            grid[gridY * GRIDSIZE + gridX] = selectedTile;
+        }
     }
 }
 
@@ -136,7 +175,7 @@ int main()
                 else
                 { // Click on grid
                     drawing = true;
-                    handleDrawing(window);
+                    handleDrawing(window, sf::Mouse::isButtonPressed(sf::Mouse::Button::Right));
                 }
             }
             if (event->is<sf::Event::MouseButtonReleased>())
@@ -157,7 +196,7 @@ int main()
                 }
                 if (event->is<sf::Event::MouseMoved>() && drawing)
                 {
-                    handleDrawing(window);
+                    handleDrawing(window, sf::Mouse::isButtonPressed(sf::Mouse::Button::Right));
                 }
             }
             if (event->is<sf::Event::KeyPressed>())
@@ -173,6 +212,7 @@ int main()
                 {
                     loadCSV();
                 }
+
                 // this is evil and I hate this but idk/can't be bothered doing the proper thing
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num0))
                 {
