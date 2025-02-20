@@ -7,11 +7,14 @@
 #include <string>
 #include <ctime>
 #include <queue>
+#include <bitset>
 
 const float TILESIZE = 32;
 const float GRIDSIZE = 32;
 const int WIDTH = 1920;
 const int HEIGHT = 1080;
+const int RULETILE = 7;   // The middle tile used when rule tiling
+const int TILESWIDTH = 4; // width of tilesheet in tiles
 
 std::vector<int> grid(GRIDSIZE *GRIDSIZE, 0);
 int selectedTile = 0;
@@ -120,6 +123,86 @@ void bucketFill(int x, int y, int newTile)
     }
 }
 
+bool isValidForRuling(const int pos, int base)
+{
+    // if that position isn't the base and isn't the necessary tile
+    return grid[pos] != base && (grid[pos] == 0 || grid[pos] == 1 || grid[pos] == RULETILE + (TILESWIDTH * 2) - 1 || grid[pos] == RULETILE + (TILESWIDTH * 2) + 1 || grid[pos] == RULETILE + (TILESWIDTH * 2));
+}
+
+void ruleIt()
+{
+    for (int x = 0; x < GRIDSIZE; x++)
+    {
+        for (int y = 0; y < GRIDSIZE; y++)
+        {
+            const int current = y * GRIDSIZE + x;
+
+            if (grid[current] == RULETILE)
+            {
+                // foreach tile get its surrounding tils
+                const int up = ((y - 1) * GRIDSIZE) + x;
+                const int down = ((y + 1) * GRIDSIZE) + x;
+                const int left = current - 1;
+                const int right = current + 1;
+                /*                 const int topLeft = up - 1;
+                                const int topRight = up + 1;
+                                const int bottomLeft = down - 1;
+                                const int bottomRight = down + 1; */
+
+                // bitmask for surrounding tiles
+                int8_t surrounding = 0;
+                // 0    0    0    0    0    0    0    0
+                // TL  TR  BL  BR  U    D    L    R
+                // 2     4    10  12  3    11  6    8
+
+                // set bit flags
+                surrounding |= isValidForRuling(right, RULETILE) ? 0b00000001 : 0; // right
+                surrounding |= isValidForRuling(left, RULETILE) ? 0b00000010 : 0;  // left
+                surrounding |= isValidForRuling(down, RULETILE) ? 0b00000100 : 0;  // down
+                surrounding |= isValidForRuling(up, RULETILE) ? 0b00001000 : 0;    // up
+                                                                                   /*                 surrounding |= isValid(bottomRight, 7, 12) ? 0b00010000 : 0; // bottomright
+                                                                                                   surrounding |= isValid(bottomLeft, 7, 10) ? 0b00100000 : 0;  // bottomleft
+                                                                                                   surrounding |= isValid(topRight, 7, 4) ? 0b01000000 : 0;     // topright
+                                                                                                   surrounding |= isValid(topLeft, 7, 2) ? 0b10000000 : 0;      // topleft */
+
+                // switch statement from flags
+                switch (surrounding)
+                {
+                case 0b00000001: // right
+                    grid[current] = RULETILE + 1;
+                    break;
+                case 0b00000010: // left
+                    grid[current] = RULETILE - 1;
+                    break;
+                case 0b00000100: // down
+                    grid[current] = RULETILE + TILESWIDTH;
+                    grid[down] = RULETILE + (TILESWIDTH * 2);
+                    break;
+                case 0b00001000: // up
+                    grid[current] = RULETILE - TILESWIDTH;
+                    break;
+                case 0b00000101: // bottom right
+                    grid[current] = RULETILE + TILESWIDTH + 1;
+                    grid[down] = RULETILE + (TILESWIDTH * 2) + 1;
+                    break;
+                case 0b00000110: // bottom left
+                    grid[current] = RULETILE + TILESWIDTH - 1;
+                    grid[down] = RULETILE + (TILESWIDTH * 2) - 1;
+                    break;
+                case 0b00001001: // top right
+                    grid[current] = RULETILE - TILESWIDTH + 1;
+                    break;
+                case 0b00001010: // top left
+                    grid[current] = RULETILE - TILESWIDTH - 1;
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    }
+}
+
 void handleDrawing(const sf::RenderWindow &window, bool bucket)
 {
     sf::Vector2i mPos = sf::Mouse::getPosition(window);
@@ -211,6 +294,10 @@ int main()
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Enter))
                 {
                     loadCSV();
+                }
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::R))
+                {
+                    ruleIt();
                 }
 
                 // this is evil and I hate this but idk/can't be bothered doing the proper thing
