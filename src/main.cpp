@@ -235,8 +235,12 @@ int main()
 
     sf::Font font("./gfx/font.ttf");
     sf::Text credit(font, "Made for CMP105 team abra\n Jack Sneddon - 2309340", 22);
+    sf::Text controls(font, "CONTROLS:\n LeftClick - place tile \n RightClick - bucketFill\n R - apply ruling\n Escape - clear grid\n Enter - load from file (console)\n Space - save to working dir\n 1-9 - load that sheet from ./gfx/", 26);
     credit.setFillColor(sf::Color::White);
     credit.setPosition({WIDTH * 0.67f, HEIGHT * 0.88f});
+
+    controls.setFillColor(sf::Color::White);
+    controls.setPosition({WIDTH * 0.55f, HEIGHT * 0.15f});
 
     while (window.isOpen())
     {
@@ -392,6 +396,7 @@ int main()
         // Draw tilesheet
         window.draw(palette);
         window.draw(credit);
+        window.draw(controls);
         window.display();
     }
     return 0;
