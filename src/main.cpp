@@ -299,6 +299,13 @@ int main()
                 {
                     ruleIt();
                 }
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
+                {
+                    for (int i = 0; i < GRIDSIZE * GRIDSIZE; i++)
+                    {
+                        grid[i] = 0;
+                    }
+                }
 
                 // this is evil and I hate this but idk/can't be bothered doing the proper thing
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num0))
