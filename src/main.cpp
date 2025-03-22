@@ -13,7 +13,7 @@ const float TILESIZE = 32;
 const float GRIDSIZE = 32;
 const int WIDTH = 1920;
 const int HEIGHT = 1080;
-const int RULETILE = 7;   // The middle tile used when rule tiling
+int RULETILE = 7;         // The middle tile used when rule tiling
 const int TILESWIDTH = 4; // width of tilesheet in tiles
 
 std::vector<int> gridLayer1(GRIDSIZE *GRIDSIZE, 0);
@@ -281,7 +281,7 @@ int main()
 
     sf::Font font("./gfx/font.ttf");
     sf::Text credit(font, "Made for CMP105 team abra\n Jack Sneddon - 2309340", 22);
-    sf::Text controls(font, "CONTROLS:\n LeftClick - place tile \n RightClick - bucketFill\n MiddleClick - delete tile\n R - apply ruling\n Escape - clear grid\n Enter - load from file (console)\n Space - save to working dir\n 1-9 - load that sheet from ./gfx/\n Tab - switch layer\n Current Layer: 1", 26);
+    sf::Text controls(font, "CONTROLS:\n LeftClick - place tile \n RightClick - bucketFill\n MiddleClick - delete tile\n R - apply ruling\n K - set RULETILE to selected tile\n Escape - clear grid\n Enter - load from file (console)\n Space - save to working dir\n 1-9 - load that sheet from ./gfx/\n Tab - switch layer\n Current Layer: 1", 26);
     credit.setFillColor(sf::Color::White);
     credit.setPosition({WIDTH * 0.67f, HEIGHT * 0.88f});
 
@@ -357,6 +357,11 @@ int main()
                 {
                     ruleIt();
                 }
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::K))
+                {
+                    RULETILE = selectedTile;
+                    std::cout << "RULETILE set to " << RULETILE << "\n";
+                }
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
                 {
                     for (int i = 0; i < GRIDSIZE * GRIDSIZE; i++)
@@ -375,7 +380,7 @@ int main()
                     palette.setSize({static_cast<float>(textureSize.x), static_cast<float>(textureSize.y)});
                     palette.setTexture(&currentSheet);
 
-                    controls.setString("CONTROLS:\n LeftClick - place tile \n RightClick - bucketFill\n MiddleClick - delete tile\n R - apply ruling\n Escape - clear grid\n Enter - load from file (console)\n Space - save to working dir\n 1-9 - load that sheet from ./gfx/\n Tab - switch layer\n Current Layer: " + std::to_string(currentLayer)); // Update controls text
+                    controls.setString("CONTROLS:\n LeftClick - place tile \n RightClick - bucketFill\n MiddleClick - delete tile\n R - apply ruling\n K - set RULETILE to selected tile\n Escape - clear grid\n Enter - load from file (console)\n Space - save to working dir\n 1-9 - load that sheet from ./gfx/\n Tab - switch layer\n Current Layer: " + std::to_string(currentLayer)); // Update controls text
                     std::cout << "Switched to layer " << currentLayer << "\n";
                 }
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num0))
